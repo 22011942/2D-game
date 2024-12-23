@@ -56,12 +56,6 @@ void updateChunks(const sf::View& view, sf::RenderWindow& window) {
                 generateChunkImprov(chunkX, chunkY, &chunks);
             }
 
-            //for (const auto& row : chunks.at({chunkX, chunkY})) {
-            //    for (const auto& block : row) {
-            //        window.draw(block);
-            //    }
-            //}
-
             if (chunks.find({chunkX, chunkY}) != chunks.end()) {
                 window.draw(chunks.at({chunkX, chunkY}));
             }
@@ -69,21 +63,12 @@ void updateChunks(const sf::View& view, sf::RenderWindow& window) {
         }
     }
 
-    //for (const auto& [chunkCoords, chunkData] : chunks) {
-    //    for (const auto& row : chunkData) {
-    //        for (const auto& block : row) {
-    //            window.draw(block);
-    //        }
-    //    }
-    //}
 }
 
 
 int main() {
     auto window = sf::RenderWindow({1920u, 1080u}, "CMake SFML Project", sf::Style::Close | sf::Style::Resize);
-    //sf::Uint8* pixels = new sf::Uint8[WORLD_WIDTH * WORLD_HEIGHT * 4];
-    //map<pair<int, int>, vector<vector<sf::RectangleShape>>> chunks;
-    //vector<vector<sf::RectangleShape>> worldGrid;
+
     auto view = sf::View(sf::Vector2f(0.0f,0.0f), {VIEW_HEIGHT, VIEW_HEIGHT});
 
     float aspectRatio = (float)window.getSize().x / (float)window.getSize().y;
@@ -105,10 +90,10 @@ int main() {
     //generateMap(&worldGrid);
 
     //sf::Texture texture1; 
-//
+
     //texture1.create(WORLD_WIDTH, WORLD_HEIGHT);
     //texture1.update(pixels);
-//
+
     //
     //sf::Sprite sprite1(texture1);
 

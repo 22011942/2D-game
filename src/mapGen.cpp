@@ -5,26 +5,17 @@
 #include <iostream>
 #include <vector>
 #include "biomes.h"
+#include "structureSpawn.h"
+#include "mapGen.h"
 
-//float seed = static_cast<float>(std::time(nullptr));
-
-const int BLOCK_SIZE = 8;
-const int WORLD_HEIGHT = 10000;
-const int MAX_HEIGHT = WORLD_HEIGHT / BLOCK_SIZE;
-const int WORLD_WIDTH = 30000;
 const int CHUNK_SIZE = 16;
+
 
 biomes currentBiome;
 
-struct Color {
-    unsigned int r, g, b;
-};
-
-void setColor(Color& color,unsigned int r, unsigned int g, unsigned int b) {
-    color.r = r;
-    color.g = g;
-    color.b = b;
-}
+typedef enum {
+    SANDb, DIRTb, ROCKb, WATERb, LAVAb, DARK_DIRTb, CLAYb, CAVEb, GRASSb, AIRb
+} blockTypes;
 
 float multiNoise(float blockX, float blockY, float frequency, float amplitude) {
     float value {0};
@@ -269,21 +260,9 @@ std::string biomeToString(biomes biome) {
 
 
 void generateChunkImprov(int chunkX, int chunkY, std::map<std::pair<int, int>, sf::VertexArray> *chunks) {
-    
-    Color SAND, DIRT, ROCK, GRASS, AIR, WATER, CAVE, CLAY, DARK_DIRT, LAVA;
-
-    setColor(SAND, 255, 239, 0);
-    setColor(DIRT, 139, 69, 19);
-    setColor(ROCK, 100, 100, 100);
-    setColor(GRASS, 0, 204, 0);
-    setColor(AIR, 135, 206, 235);
-    setColor(CAVE, 28, 28, 28);
-    setColor(WATER, 0, 0, 255);
-    setColor(LAVA, 255, 86, 0);
-    setColor(CLAY, 163, 163, 163);
-    setColor(DARK_DIRT, 82, 39, 0);
 
     sf::VertexArray chunk(sf::Quads);
+    sf::VertexArray air(sf::Quads);
 
     for (int blockX = 0; blockX < CHUNK_SIZE; blockX++) {
 
@@ -300,8 +279,8 @@ void generateChunkImprov(int chunkX, int chunkY, std::map<std::pair<int, int>, s
         //std::cout << "continentalness: " << continentalness << std::endl;
 
         biomeGen(continentalness, erosion, temperature, humidity);
-        biomeEffects(currentBiome);
-        std::cout << "Current biome: " << biomeToString(currentBiome) << std::endl;
+        //biomeEffects(currentBiome);
+        std::cout << "Current biome: " << biomeToString(currentBiome) << "  continentalness: " << continentalness << "   erosion: " << erosion << "   temperature: " << temperature << "   humidity: " << humidity << std::endl;
 
 
         continentalness = std::clamp((continentalness + 1.0f) * 0.5f, 0.0f, 1.0f);
@@ -348,84 +327,86 @@ void generateChunkImprov(int chunkX, int chunkY, std::map<std::pair<int, int>, s
                     if (worldY < MAX_HEIGHT - groundHeight + 100 && multiNoise(worldX, worldY * 0.85f, 1.0f, 1.0f) > 0) {
                         if (stoneInDirt < -0.38) {
                             
-                            blockColor = sf::Color(ROCK.r, ROCK.g, ROCK.b);
+                            blockColor = ROCK;
                         } else {
-                            blockColor = sf::Color(DIRT.r, DIRT.g, DIRT.b);
+                            blockColor = DIRT;
+                            //chunkGrassLayer[worldX][worldY] = DIRTb;
                         }
 
                         if (clay < -0.6) {
-                            blockColor = sf::Color(CLAY.r, CLAY.g, CLAY.b);
+                            blockColor = CLAY;
                         }
 
                         if (upperCaves < -0.5) {
-                            blockColor = sf::Color(DARK_DIRT.r, DARK_DIRT.g, DARK_DIRT.b);
+                            blockColor = DARK_DIRT;
                         }
 
                         if (surfaceCaves < -0.12) {
-                            blockColor = sf::Color(DARK_DIRT.r, DARK_DIRT.g, DARK_DIRT.b);
+                            blockColor = DARK_DIRT;
                         }
 
                     //this is the normal case
                     } else if (worldY > MAX_HEIGHT - groundHeight + 100 && worldY < MAX_HEIGHT - groundHeight + 120) {
                         if (stoneInDirt < -0.3) {
-                            blockColor = sf::Color(ROCK.r, ROCK.g, ROCK.b);
+                            blockColor = ROCK;
                         } else {
-                            blockColor = sf::Color(DIRT.r, DIRT.g, DIRT.b);
+                            blockColor = DIRT;
+                            //chunkGrassLayer[worldX][worldY] = DIRTb;
                         }
 
                         if (clay < -0.6) {
-                            blockColor = sf::Color(CLAY.r, CLAY.g, CLAY.b);
+                            blockColor = CLAY;
                         }
 
                         if (caves < -0.7) { // water cave
-                            blockColor = sf::Color(WATER.r, WATER.g, WATER.b);
+                            blockColor = WATER;
                         }
 
                         if (upperCaves < -0.5) {
-                            blockColor = sf::Color(DARK_DIRT.r, DARK_DIRT.g, DARK_DIRT.b);
+                            blockColor = DARK_DIRT;
                         }
 
                         if (surfaceCaves < -0.12) {
-                            blockColor = sf::Color(DARK_DIRT.r, DARK_DIRT.g, DARK_DIRT.b);
+                            blockColor = DARK_DIRT;
                         }
 
                     } else if (worldY > MAX_HEIGHT - groundHeight + 120 && worldY < MAX_HEIGHT - groundHeight + 155) {
                         if (stoneInDirt < 0.1) {
-                            blockColor = sf::Color(ROCK.r, ROCK.g, ROCK.b);
+                            blockColor = ROCK;
                         } else {
-                            blockColor = sf::Color(DIRT.r, DIRT.g, DIRT.b);
+                            blockColor = DIRT;
                         }
 
                         if (clay < -0.6) {
-                            blockColor = sf::Color(CLAY.r, CLAY.g, CLAY.b);
+                            blockColor = CLAY;
                         }
 
                         if (caves < -0.5) { // water cave
-                            blockColor = sf::Color(WATER.r, WATER.g, WATER.b);
+                            blockColor = WATER;
                         }
 
                         if (upperCaves < -0.2) {
-                            blockColor = sf::Color(DARK_DIRT.r, DARK_DIRT.g, DARK_DIRT.b);
+                            blockColor = DARK_DIRT;
                         }
 
                         if (surfaceCaves < -0.2) {
-                            blockColor = sf::Color(DARK_DIRT.r, DARK_DIRT.g, DARK_DIRT.b);
+                            blockColor = DARK_DIRT;
                         }
 
 
                     } else if (worldY > MAX_HEIGHT - groundHeight + 155) {
                         if (dirtInStone < 0.4) {
-                            blockColor = sf::Color(ROCK.r, ROCK.g, ROCK.b);
+                            blockColor = ROCK;
                         } else {
-                            blockColor = sf::Color(DIRT.r, DIRT.g, DIRT.b);
+                            blockColor = DIRT;
                         }
 
                         if (caves < -0.5) { // water cave
-                            blockColor = sf::Color(WATER.r, WATER.g, WATER.b);
+                            blockColor = WATER;
                         }
 
                         if (middleCaves < -0.5) {
-                            blockColor = sf::Color(CAVE.r, CAVE.g, CAVE.b);
+                            blockColor = CAVE;
                         }
 
                     }
@@ -437,16 +418,16 @@ void generateChunkImprov(int chunkX, int chunkY, std::map<std::pair<int, int>, s
                     //Caves
 
                     if (waterCaves < -0.6) { // water cave
-                        blockColor = sf::Color(WATER.r, WATER.g, WATER.b);
+                        blockColor = WATER;
                     }
                     
                     if (caves < -0.3) { // was -0.05
                         //r = CAVE.r; g = CAVE.g; b = CAVE.b;
-                        blockColor = sf::Color(CAVE.r, CAVE.g, CAVE.b);
+                        blockColor = CAVE;
                     }
 
                     if (middleCaves < -0.5) {
-                        blockColor = sf::Color(CAVE.r, CAVE.g, CAVE.b);
+                        blockColor = CAVE;
                     }
 
                 }
@@ -455,15 +436,16 @@ void generateChunkImprov(int chunkX, int chunkY, std::map<std::pair<int, int>, s
 
                     if (caves < -0.3) { // was -0.05
                         //r = CAVE.r; g = CAVE.g; b = CAVE.b;
-                        blockColor = sf::Color(CAVE.r, CAVE.g, CAVE.b);
+                        blockColor = CAVE;
                     }
 
                     if (lavaCaves < -0.5) { // lava cave
-                        blockColor = sf::Color(LAVA.r, LAVA.g, LAVA.b);
+                        blockColor = LAVA;
                     }
                 }
-            }
-             if (blockColor != sf::Color::Transparent) {
+            } 
+
+            if (blockColor != sf::Color::Transparent) {
                 sf::Vertex topLeft(sf::Vector2f(worldX * BLOCK_SIZE, worldY * BLOCK_SIZE), blockColor);
                 sf::Vertex topRight(sf::Vector2f((worldX + 1) * BLOCK_SIZE, worldY * BLOCK_SIZE), blockColor);
                 sf::Vertex bottomRight(sf::Vector2f((worldX + 1) * BLOCK_SIZE, (worldY + 1) * BLOCK_SIZE), blockColor);
@@ -473,9 +455,39 @@ void generateChunkImprov(int chunkX, int chunkY, std::map<std::pair<int, int>, s
                 chunk.append(topRight);
                 chunk.append(bottomRight);
                 chunk.append(bottomLeft);
+            } else {
+                sf::Vertex topLeft(sf::Vector2f(worldX * BLOCK_SIZE, worldY * BLOCK_SIZE), blockColor);
+                sf::Vertex topRight(sf::Vector2f((worldX + 1) * BLOCK_SIZE, worldY * BLOCK_SIZE), blockColor);
+                sf::Vertex bottomRight(sf::Vector2f((worldX + 1) * BLOCK_SIZE, (worldY + 1) * BLOCK_SIZE), blockColor);
+                sf::Vertex bottomLeft(sf::Vector2f(worldX * BLOCK_SIZE, (worldY + 1) * BLOCK_SIZE), blockColor);
+
+                air.append(topLeft);
+                air.append(topRight);
+                air.append(bottomRight);
+                air.append(bottomLeft);
+            }
+            
+        }
+    }
+    
+
+
+    for (size_t indx = 0; indx < chunk.getVertexCount(); indx++) {
+        if (chunk[indx].color == DIRT) {
+            for (size_t i = 0; i < air.getVertexCount(); i ++) {
+                if (air[i].position.x == chunk[indx].position.x && air[i].position.y == chunk[indx].position.y) {
+                    chunk[indx].color = GRASS;
+                }
             }
         }
     }
+
+
+    //for (size_t indx = 0; indx < chunk.getVertexCount(); indx++) {
+    //    if (chunk[indx].color == sf::Color::Red) {
+    //        std::cout << "Red found " << std::endl;
+    //    }
+    //}
 
     (*chunks)[{chunkX, chunkY}] = chunk;
 }

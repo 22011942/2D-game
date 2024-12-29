@@ -7,6 +7,7 @@
 #include "biomes.h"
 #include "structureSpawn.h"
 #include "mapGen.h"
+#include <algorithm>
 
 const int CHUNK_SIZE = 16;
 
@@ -258,6 +259,15 @@ std::string biomeToString(biomes biome) {
     }
 }
 
+bool grassCheck(int y, int x, sf::VertexArray air) {
+    for (size_t indx = 0; indx < air.getVertexCount(); indx += 4) {
+        if (air[indx].position.y == y && air[indx].position.x == x) {
+            return true;
+        }
+    }
+    return false;
+}
+
 
 void generateChunkImprov(int chunkX, int chunkY, std::map<std::pair<int, int>, sf::VertexArray> *chunks) {
 
@@ -266,7 +276,7 @@ void generateChunkImprov(int chunkX, int chunkY, std::map<std::pair<int, int>, s
 
     for (int blockX = 0; blockX < CHUNK_SIZE; blockX++) {
 
-        float worldX = chunkX * CHUNK_SIZE + blockX;
+        int worldX = chunkX * CHUNK_SIZE + blockX;
 
         //std::cout << "worldX: " << worldX << std::endl;
 
@@ -280,7 +290,7 @@ void generateChunkImprov(int chunkX, int chunkY, std::map<std::pair<int, int>, s
 
         biomeGen(continentalness, erosion, temperature, humidity);
         //biomeEffects(currentBiome);
-        std::cout << "Current biome: " << biomeToString(currentBiome) << "  continentalness: " << continentalness << "   erosion: " << erosion << "   temperature: " << temperature << "   humidity: " << humidity << std::endl;
+        //std::cout << "Current biome: " << biomeToString(currentBiome) << "  continentalness: " << continentalness << "   erosion: " << erosion << "   temperature: " << temperature << "   humidity: " << humidity << std::endl;
 
 
         continentalness = std::clamp((continentalness + 1.0f) * 0.5f, 0.0f, 1.0f);
@@ -302,7 +312,7 @@ void generateChunkImprov(int chunkX, int chunkY, std::map<std::pair<int, int>, s
         groundHeight = std::clamp(groundHeight, 0.0f, static_cast<float>(MAX_HEIGHT));
 
         for (int blockY = 0; blockY < CHUNK_SIZE; blockY++) {
-            float worldY = chunkY * CHUNK_SIZE + blockY;
+            int worldY = chunkY * CHUNK_SIZE + blockY;
 
             bool isGround = (worldY >= MAX_HEIGHT - groundHeight);
             sf::Color blockColor = sf::Color::Transparent;
@@ -450,7 +460,6 @@ void generateChunkImprov(int chunkX, int chunkY, std::map<std::pair<int, int>, s
                 sf::Vertex topRight(sf::Vector2f((worldX + 1) * BLOCK_SIZE, worldY * BLOCK_SIZE), blockColor);
                 sf::Vertex bottomRight(sf::Vector2f((worldX + 1) * BLOCK_SIZE, (worldY + 1) * BLOCK_SIZE), blockColor);
                 sf::Vertex bottomLeft(sf::Vector2f(worldX * BLOCK_SIZE, (worldY + 1) * BLOCK_SIZE), blockColor);
-
                 chunk.append(topLeft);
                 chunk.append(topRight);
                 chunk.append(bottomRight);
@@ -460,34 +469,29 @@ void generateChunkImprov(int chunkX, int chunkY, std::map<std::pair<int, int>, s
                 sf::Vertex topRight(sf::Vector2f((worldX + 1) * BLOCK_SIZE, worldY * BLOCK_SIZE), blockColor);
                 sf::Vertex bottomRight(sf::Vector2f((worldX + 1) * BLOCK_SIZE, (worldY + 1) * BLOCK_SIZE), blockColor);
                 sf::Vertex bottomLeft(sf::Vector2f(worldX * BLOCK_SIZE, (worldY + 1) * BLOCK_SIZE), blockColor);
-
                 air.append(topLeft);
                 air.append(topRight);
                 air.append(bottomRight);
                 air.append(bottomLeft);
             }
+
+            
             
         }
     }
+
     
-
-
-    for (size_t indx = 0; indx < chunk.getVertexCount(); indx++) {
+    for (size_t indx = 0; indx < chunk.getVertexCount(); indx+=4) {
         if (chunk[indx].color == DIRT) {
-            for (size_t i = 0; i < air.getVertexCount(); i ++) {
-                if (air[i].position.x == chunk[indx].position.x && air[i].position.y == chunk[indx].position.y) {
-                    chunk[indx].color = GRASS;
-                }
+            if (grassCheck(chunk[indx].position.y - BLOCK_SIZE, chunk[indx].position.x, air)) {
+                chunk[indx].color = GRASS;
+                chunk[indx + 1].color = GRASS;
+                chunk[indx + 2].color = GRASS;
+                chunk[indx + 3].color = GRASS;
             }
         }
     }
 
-
-    //for (size_t indx = 0; indx < chunk.getVertexCount(); indx++) {
-    //    if (chunk[indx].color == sf::Color::Red) {
-    //        std::cout << "Red found " << std::endl;
-    //    }
-    //}
 
     (*chunks)[{chunkX, chunkY}] = chunk;
 }

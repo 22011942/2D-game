@@ -7,12 +7,14 @@
 #include "mapGen.h"
 #include <random>
 #include <ctime>
+#include <unordered_map>
 using namespace std;
 
 
-static const unsigned int VIEW_HEIGHT = 5000;
-//map<pair<int, int>, vector<vector<sf::RectangleShape>>> chunks;
-map<pair<int, int>, sf::VertexArray> chunks;
+static const unsigned int VIEW_HEIGHT = 3000;
+const bool NOCLIP = false;
+
+unordered_map<pair<int, int>, ChunkData, PairHash> chunks;
 
 
 void resizeView(const sf::RenderWindow& window, sf::View& view) {
@@ -21,30 +23,14 @@ void resizeView(const sf::RenderWindow& window, sf::View& view) {
     view.setSize(VIEW_HEIGHT * aspectRatio, VIEW_HEIGHT);
 }
 
-void renderVisibleBlocks(sf::RenderWindow& window, sf::View& view, vector<vector<sf::RectangleShape>> worldGrid) {
-    sf::FloatRect viewBounds(
-        view.getCenter().x - view.getSize().x / 2,
-        view.getCenter().y - view.getSize().y / 2,
-        view.getSize().x,
-        view.getSize().y
-    );
 
-    for (const auto& column : worldGrid) {
-        for (const auto& block : column) {
-            if (viewBounds.intersects(block.getGlobalBounds())) {
-                window.draw(block);
-            }
-        }
-    }
-}
-
-void updateChunks(const sf::View& view, sf::RenderWindow& window) {
+void updateChunks(const sf::View& view, sf::RenderWindow& window, Player *player) {
     //vector<vector<sf::RectangleShape>> chunk;
 
     int startX = view.getCenter().x / (16 * BLOCK_SIZE);
     int startY = view.getCenter().y / (16 * BLOCK_SIZE);
 
-    int viewRadius = 20; // Number of chunks to load around the player
+    int viewRadius = 10; // Number of chunks to load around the player
 
     for (int dx = -viewRadius; dx <= viewRadius; ++dx) {
         for (int dy = -viewRadius; dy <= viewRadius; ++dy) {
@@ -52,12 +38,25 @@ void updateChunks(const sf::View& view, sf::RenderWindow& window) {
             int chunkY = startY + dy;
 
             if (chunks.find({chunkX, chunkY}) == chunks.end()) {
-                //generateChunk(chunkX, chunkY, &chunks);
                 generateChunkImprov(chunkX, chunkY, &chunks);
             }
 
-            if (chunks.find({chunkX, chunkY}) != chunks.end()) {
-                window.draw(chunks.at({chunkX, chunkY}));
+
+            sf::Vector2f direction;
+
+            if (chunks.find({chunkX, chunkY}) != chunks.end()) { // Finds the chunk that the player is in
+                const ChunkData& chunk = chunks.at({chunkX, chunkY});
+
+                if (!NOCLIP) {
+                    for (auto [postion, block] : chunk.collisionBlocks) { // Gets every block exposed to air in the chunk and checks its position against to player for collision
+                        if (Collision(block).checkCollision(player->getPlayerCollider(), 1.0f, direction)) {
+                            player->onCollision(direction);
+                        }
+                    }
+                }
+
+
+                window.draw(chunk.chunkInfo);
             }
 
         }
@@ -85,25 +84,6 @@ int main() {
 
     std::vector<sf::RectangleShape> worldSprites;
     std::vector<Collision> collisions;
-
-
-    //generateMap(&worldGrid);
-
-    //sf::Texture texture1; 
-
-    //texture1.create(WORLD_WIDTH, WORLD_HEIGHT);
-    //texture1.update(pixels);
-
-    //
-    //sf::Sprite sprite1(texture1);
-
-
-    //std::vector<Platform> platforms;
-
-    //platforms.push_back(Platform(nullptr, sf::Vector2f(400.0f, 200.0f), sf::Vector2f(500.0f, 200.0f)));
-    //platforms.push_back(Platform(&texture1, sf::Vector2f(1000.0f, 1000.0f), sf::Vector2f(1500.0f, 0.0f)));
-    //platforms.push_back(Platform(nullptr, sf::Vector2f(400.0f, 200.0f), sf::Vector2f(500.0f, 0.0f)));
-    //platforms.push_back(Platform(nullptr, sf::Vector2f(1000.0f, 200.0f), sf::Vector2f(500.0f, 500.0f)));
 
     float deltaTime {0.0f};
     sf::Clock clock;
@@ -138,9 +118,9 @@ int main() {
 
         player.updatePlayer(deltaTime);
 
+        //cout << "player pos x: " << (int) player.getPlayerPosition().x << "player pos y:" << (int) player.getPlayerPosition().y << endl;
+
         //sf::Vector2f direction;
-//
-//
         //for (Collision& col : collisions) {
         //    if (col.checkCollision(player.getPlayerCollider(), 1.0f, direction)) {
         //        player.onCollision(direction);
@@ -161,25 +141,12 @@ int main() {
 
         window.clear(sf::Color(207, 207, 207, 255));
         window.setView(view);
-        //window.draw(sprite1);
         window.draw(sky);
 
-        //renderVisibleBlocks(window, view, worldGrid);
-
-        updateChunks(view, window);
+        updateChunks(view, window, &player);
 
 
         player.Draw(window);
-        //platform1.drawPlatform(window);
-        //platform2.drawPlatform(window);
-
-        //for (Platform& platform : platforms) {
-        //    platform.drawPlatform(window);
-        //}
-
-        //for (sf::RectangleShape& shape : worldSprites) {
-        //    window.draw(shape);
-        //}
 
         window.display();
     }

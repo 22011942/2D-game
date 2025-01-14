@@ -5,6 +5,8 @@
 #include <cmath>
 #include <SFML/Graphics.hpp>
 
+const bool FLIGHT = true;
+
 Player::Player(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, float speed, float jumpHeight) : playerCollider(body) {
     initAnimation(texture, imageCount, switchTime);
     this->speed = speed;
@@ -23,26 +25,37 @@ void Player::updatePlayer(float deltaTime) {
     velocity.x = 0.0f;
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-        //velocity.x -= speed;
-        movement.x -= speed * deltaTime;
+
+        if (FLIGHT) {
+            movement.x -= speed * deltaTime;
+        } else {
+            velocity.x -= speed;  
+        }
+        
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-        //velocity.x += speed;
-        movement.x += speed * deltaTime;
+
+        if (FLIGHT) {
+            movement.x += speed * deltaTime;
+        } else {
+            velocity.x += speed; 
+        }
 
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) { //add && canJump
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) && canJump) { //add && canJump
 
-        movement.y -= speed * deltaTime;
+        if (FLIGHT) {
+            movement.y -= speed * deltaTime;
+        } else {
+            canJump = false;
+            velocity.y = -sqrtf(2.0f * 981.0f * jumpHieght);
+            //sqaure root (2.0f * gravity * jumpheight)
+        }
 
-        //canJump = false;
-
-        //velocity.y = -sqrtf(2.0f * 981.0f * jumpHieght);
-        //sqaure root (2.0f * gravity * jumpheight)
 
     }
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) && FLIGHT) {
         movement.y += speed * deltaTime;
     }
 
@@ -53,19 +66,24 @@ void Player::updatePlayer(float deltaTime) {
 
     } else {
         row = 1;
-        
-        if (movement.x > 0) { // change to velocity
+
+        if (velocity.x > 0 && !FLIGHT || movement.x > 0 && FLIGHT) { // change to velocity
             faceRight = true;
         } else {
             faceRight = false;
         }
+
     }
 
 
 
     update(row, deltaTime, faceRight);
     body.setTextureRect(getUvRect());
-    body.move(movement); // change to velocity * delta time
+    if (FLIGHT) {
+        body.move(movement);
+    } else {
+        body.move(velocity * deltaTime); // change to velocity * delta time
+    }
 }
 
 void Player::Draw(sf::RenderWindow& window) {

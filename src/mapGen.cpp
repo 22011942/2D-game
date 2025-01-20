@@ -262,26 +262,6 @@ std::string biomeToString(biomes biome) {
     }
 }
 
-
-//bool underGroundCheck(int y, int x, sf::VertexArray air) {
-//    while (y >= topBlock) {
-//
-//        for (size_t indx = 0; indx < air.getVertexCount(); indx += 4) {
-//            if (air[indx].position.x == x && air[indx].position.y == y) {
-//                if (air[indx].color == sf::Color::Transparent) {
-//                    break;
-//                } else {
-//                    return true;
-//                }
-//            }
-//        }
-//
-//        y -= BLOCK_SIZE;
-//
-//    }
-//    return false;
-//}
-
 bool grassCheck(int y, int x, sf::VertexArray air) {
     for (size_t indx = 0; indx < air.getVertexCount(); indx += 4) {
         if (air[indx].position.y == y && air[indx].position.x == x) {
@@ -302,7 +282,7 @@ bool surfaceCollisionCheck(int y, int x, sf::VertexArray air) {
 
 
 void generateChunkImprov(int chunkX, int chunkY, std::unordered_map<std::pair<int, int>, ChunkData, PairHash> *chunks) {
-    topBlock = 0;
+    std::unordered_map<int, int> underGroundValues;
     sf::VertexArray chunk(sf::Quads);
     sf::VertexArray air(sf::Quads);
     std::map<std::pair<int, int>, sf::RectangleShape> collisionBlocks;
@@ -349,6 +329,8 @@ void generateChunkImprov(int chunkX, int chunkY, std::unordered_map<std::pair<in
             int worldY = chunkY * CHUNK_SIZE + blockY;
 
             bool isGround = (worldY >= MAX_HEIGHT - groundHeight);
+            //std:: cout << " height: " << MAX_HEIGHT - (int)groundHeight << std::endl;
+            underGroundValues[worldX] = MAX_HEIGHT - (int)groundHeight;
             sf::Color blockColor = sf::Color::Transparent;
 
             if (isGround) {
@@ -367,6 +349,7 @@ void generateChunkImprov(int chunkX, int chunkY, std::unordered_map<std::pair<in
 
                     //float DirtInStone = multiNoise(worldX, worldY, 80.0f, 1.0f);
                     // Deeper layers (stone)
+
                     //makes sure that when density is done the rock can only be placed where density is greater then 0 to avoid going over whats done
                     if (worldY < MAX_HEIGHT - groundHeight + 100 && multiNoise(worldX, worldY * 0.85f, 1.0f, 1.0f) > 0) {
                         if (stoneInDirt < -0.38) {
@@ -504,6 +487,7 @@ void generateChunkImprov(int chunkX, int chunkY, std::unordered_map<std::pair<in
                 chunk.append(topRight);
                 chunk.append(bottomRight);
                 chunk.append(bottomLeft);
+                //std::cout << "worldx " << worldX << " worldx * blocksize " << worldY << std::endl;
             } else {
                 //std::cout << "worldx " << worldX << " worldx * blocksize " << worldX * BLOCK_SIZE << std::endl;
                 sf::Vertex topLeft(sf::Vector2f(worldX * BLOCK_SIZE, worldY * BLOCK_SIZE), blockColor);
@@ -515,33 +499,34 @@ void generateChunkImprov(int chunkX, int chunkY, std::unordered_map<std::pair<in
                 air.append(bottomRight);
                 air.append(bottomLeft);
             }
-            if (worldY * BLOCK_SIZE > topBlock) {
-                topBlock = worldY * BLOCK_SIZE;
-            }
         }
     }
 
     
     for (size_t indx = 0; indx < chunk.getVertexCount(); indx+=4) {
         if (chunk[indx].color == DIRT) {
-            if (grassCheck(chunk[indx].position.y - BLOCK_SIZE, chunk[indx].position.x, air)) {
+            //std:: cout << "height: " <<underGroundValues[chunk[indx].position.x / BLOCK_SIZE] << std::endl;
+            if (grassCheck(chunk[indx].position.y - BLOCK_SIZE, chunk[indx].position.x, air)) { // && chunk[indx].position.y <= (underGroundValues[chunk[indx].position.x / BLOCK_SIZE]) * BLOCK_SIZE
                 //std::cout << "Current x pos: " << chunk[indx].position.x << "   current y pos: " << chunk[indx].position.y << std::endl;
                 float treeSpawns = multiNoise(chunk[indx].position.x * 0.5f, chunk[indx].position.y * 2.0f, 50.0f, 1.0f);
-                if (treeSpawns < treeSpawnRate) {
-                    spawnTreeAt(chunk[indx].position.x + BLOCK_SIZE, chunk[indx].position.y, &chunk);
-                }
+
                 chunk[indx].color = GRASS;
                 chunk[indx + 1].color = GRASS;
                 chunk[indx + 2].color = GRASS;
                 chunk[indx + 3].color = GRASS;
+
+                if (treeSpawns < treeSpawnRate) {
+                    spawnTreeAt(chunk[indx].position.x + BLOCK_SIZE, chunk[indx].position.y, &chunk);
+                }
             }
         }
     }
 
+
     ChunkData newChunk;
 
     for (size_t indx = 0; indx < chunk.getVertexCount(); indx+=4) {
-        if (surfaceCollisionCheck(chunk[indx].position.y, chunk[indx].position.x, air)) {
+        if (surfaceCollisionCheck(chunk[indx].position.y, chunk[indx].position.x, air) && chunk[indx].color != TRUNK_BLOCK && chunk[indx].color != LEAVES_BLOCK) {
 
             float minX = chunk[indx].position.x;
             float minY = chunk[indx].position.y;
@@ -571,6 +556,7 @@ void generateChunkImprov(int chunkX, int chunkY, std::unordered_map<std::pair<in
     }
 
     newChunk.chunkInfo = chunk;
+    newChunk.airInChunk = air;
     newChunk.collisionBlocks = collisionBlocks;
 
     (*chunks)[{chunkX, chunkY}] = newChunk;

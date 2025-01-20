@@ -11,8 +11,10 @@
 using namespace std;
 
 
-static const unsigned int VIEW_HEIGHT = 3000;
+static const unsigned int VIEW_HEIGHT = 750;
 const bool NOCLIP = false;
+bool breakingBlock = false;
+//sf::Vector2f breakingPosition;
 
 unordered_map<pair<int, int>, ChunkData, PairHash> chunks;
 
@@ -45,7 +47,9 @@ void updateChunks(const sf::View& view, sf::RenderWindow& window, Player *player
             sf::Vector2f direction;
 
             if (chunks.find({chunkX, chunkY}) != chunks.end()) { // Finds the chunk that the player is in
-                const ChunkData& chunk = chunks.at({chunkX, chunkY});
+                ChunkData& chunk = chunks.at({chunkX, chunkY});
+
+                (*player).mouseInteration(window, &chunk);
 
                 if (!NOCLIP) {
                     for (auto [postion, block] : chunk.collisionBlocks) { // Gets every block exposed to air in the chunk and checks its position against to player for collision
@@ -55,6 +59,9 @@ void updateChunks(const sf::View& view, sf::RenderWindow& window, Player *player
                     }
                 }
 
+                //if (breakingBlock && sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+                //    //continueBreakingBlock(breakingPosition);
+                //}
 
                 window.draw(chunk.chunkInfo);
             }
@@ -110,32 +117,21 @@ int main() {
                     printf("%c", event.text.unicode);
             }
 
-            if (event.type == sf::Event::Resized) {
-                resizeView(window, view);
-            }
+            //if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
+            //    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+            //    sf::Vector2f worldPos = window.mapPixelToCoords(mousePos);
+            //    breakingBlock = true;
+            //}
+
+            //if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left) {
+            //    // Stop breaking the block
+            //    breakingBlock = false;
+            //}
+
         }
 
 
         player.updatePlayer(deltaTime);
-
-        //cout << "player pos x: " << (int) player.getPlayerPosition().x << "player pos y:" << (int) player.getPlayerPosition().y << endl;
-
-        //sf::Vector2f direction;
-        //for (Collision& col : collisions) {
-        //    if (col.checkCollision(player.getPlayerCollider(), 1.0f, direction)) {
-        //        player.onCollision(direction);
-        //    }
-        //}
-
-        //for (Platform& platform : platforms) {
-        //    if (platform.getColliderPlat().checkCollision(player.getPlayerCollider(), 1.0f, direction)) {
-        //        player.onCollision(direction);
-        //    }
-        //}
-
-        //platform1.getColliderPlat().checkCollision(player.getPlayerCollider(), 0.0f);
-        //platform2.getColliderPlat().checkCollision(player.getPlayerCollider(), 1.0f);
-
 
         view.setCenter(player.getPlayerPosition());
 

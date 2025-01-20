@@ -43,6 +43,7 @@ struct PairHash {
 
 struct ChunkData {
     sf::VertexArray chunkInfo; // Chunk information (e.g., rendering)
+    sf::VertexArray airInChunk; // Contains all blocks which act like air
     std::map<std::pair<int, int>, sf::RectangleShape> collisionBlocks; // Exposed blocks
 };
 

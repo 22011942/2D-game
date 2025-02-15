@@ -11,8 +11,8 @@
 using namespace std;
 
 
-static const unsigned int VIEW_HEIGHT = 750;
-const bool NOCLIP = false;
+static const unsigned int VIEW_HEIGHT = 3000;
+const bool NOCLIP = true;
 bool breakingBlock = false;
 //sf::Vector2f breakingPosition;
 
@@ -29,10 +29,12 @@ void resizeView(const sf::RenderWindow& window, sf::View& view) {
 void updateChunks(const sf::View& view, sf::RenderWindow& window, Player *player) {
     //vector<vector<sf::RectangleShape>> chunk;
 
+
+
     int startX = view.getCenter().x / (16 * BLOCK_SIZE);
     int startY = view.getCenter().y / (16 * BLOCK_SIZE);
 
-    int viewRadius = 10; // Number of chunks to load around the player
+    int viewRadius = 15; // Number of chunks to load around the player
 
     for (int dx = -viewRadius; dx <= viewRadius; ++dx) {
         for (int dy = -viewRadius; dy <= viewRadius; ++dy) {
@@ -63,7 +65,9 @@ void updateChunks(const sf::View& view, sf::RenderWindow& window, Player *player
                 //    //continueBreakingBlock(breakingPosition);
                 //}
 
-                window.draw(chunk.chunkInfo);
+                chunk.chunkInfo.updateVertexArray();
+
+                window.draw(chunk.chunkInfo.vertexArray);
             }
 
         }
@@ -82,7 +86,7 @@ int main() {
 
     sf::Texture playerTexture, skyTexture;
     playerTexture.loadFromFile("assets\\New Piskel.png");
-    Player player(&playerTexture, sf::Vector2u(2, 3), 0.3f, 1000.0f, 200.0f);
+    Player player(&playerTexture, sf::Vector2u(2, 3), 0.3f, 2500.0f, 200.0f);
 
     skyTexture.loadFromFile("assets\\skyboxtemp.jpg");
     sf::RectangleShape sky(sf::Vector2f(30000, 10000));
@@ -148,5 +152,6 @@ int main() {
     }
 
     //delete[] pixels;
+    std::getchar();
     return 0;
 }

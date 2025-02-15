@@ -19,7 +19,7 @@ Tree oakTree = {
 };
 
 
-void spawnTreeAt(int baseX, int baseY, sf::VertexArray *chunk) {
+void spawnTreeAt(int baseX, int baseY, ChunkData *chunk) {
     for (auto [dx, dy] : oakTree.trunk) {
 
         sf::Vertex topLeft(sf::Vector2f(baseX - dx * BLOCK_SIZE, baseY - dy * BLOCK_SIZE), TRUNK_BLOCK);
@@ -27,10 +27,12 @@ void spawnTreeAt(int baseX, int baseY, sf::VertexArray *chunk) {
         sf::Vertex bottomRight(sf::Vector2f(baseX - dx * BLOCK_SIZE + BLOCK_SIZE, baseY - dy * BLOCK_SIZE + BLOCK_SIZE), TRUNK_BLOCK);
         sf::Vertex bottomLeft(sf::Vector2f(baseX - dx * BLOCK_SIZE, baseY - dy * BLOCK_SIZE + BLOCK_SIZE), TRUNK_BLOCK);
 
-        chunk->append(topLeft);
-        chunk->append(topRight);
-        chunk->append(bottomRight);
-        chunk->append(bottomLeft);
+
+        chunk->chunkInfo.vertices.push_back(topLeft);
+        chunk->chunkInfo.vertices.push_back(topRight);
+        chunk->chunkInfo.vertices.push_back(bottomRight);
+        chunk->chunkInfo.vertices.push_back(bottomLeft);
+
 
     }
     for (auto [dx, dy] : oakTree.leaves) {
@@ -41,9 +43,11 @@ void spawnTreeAt(int baseX, int baseY, sf::VertexArray *chunk) {
         sf::Vertex bottomLeft(sf::Vector2f(baseX - dx * BLOCK_SIZE, baseY - dy * BLOCK_SIZE + BLOCK_SIZE), LEAVES_BLOCK);
 
 
-        chunk->append(topLeft);
-        chunk->append(topRight);
-        chunk->append(bottomRight);
-        chunk->append(bottomLeft);
+        chunk->chunkInfo.vertices.push_back(topLeft);
+        chunk->chunkInfo.vertices.push_back(topRight);
+        chunk->chunkInfo.vertices.push_back(bottomRight);
+        chunk->chunkInfo.vertices.push_back(bottomLeft);
     }
+
+    chunk->chunkInfo.needsUpdate = true;
 }

@@ -2,6 +2,7 @@
 #include "SFML/Graphics.hpp"
 #include <vector>
 #include <unordered_map>
+#include <iostream>
 
 
 const int BLOCK_SIZE = 8;
@@ -41,11 +42,90 @@ struct PairHash {
     }
 };
 
-struct ChunkData {
-    sf::VertexArray chunkInfo; // Chunk information (e.g., rendering)
-    sf::VertexArray airInChunk; // Contains all blocks which act like air
-    std::map<std::pair<int, int>, sf::RectangleShape> collisionBlocks; // Exposed blocks
+struct Chunk {
+    std::vector<sf::Vertex> vertices;
+    sf::VertexArray vertexArray;
+    bool needsUpdate = true;
+
+    void addQuad(int xPos, int yPos, sf::Color color) {
+        sf::Vertex topLeft(sf::Vector2f(xPos * BLOCK_SIZE, yPos * BLOCK_SIZE), color);
+        sf::Vertex topRight(sf::Vector2f((xPos + 1) * BLOCK_SIZE, yPos * BLOCK_SIZE), color);
+        sf::Vertex bottomRight(sf::Vector2f((xPos + 1) * BLOCK_SIZE, (yPos + 1) * BLOCK_SIZE), color);
+        sf::Vertex bottomLeft(sf::Vector2f(xPos * BLOCK_SIZE, (yPos + 1) * BLOCK_SIZE), color);
+
+        vertices.push_back(topLeft);
+        vertices.push_back(topRight);
+        vertices.push_back(bottomRight);
+        vertices.push_back(bottomLeft);
+
+        needsUpdate = true;
+    }
+
+    void removeQuad(size_t quadIndex) {
+        size_t start = quadIndex * 4;
+        if (start + 4 <= vertices.size()) {
+            vertices.erase(vertices.begin() + start, vertices.begin() + start + 4);
+            needsUpdate = true;
+        }
+    }
+
+    void updateVertexArray() {
+        if (needsUpdate) {
+            vertexArray.clear();
+            vertexArray.setPrimitiveType(sf::Quads);
+            vertexArray.resize(vertices.size());
+            for (size_t i = 0; i < vertices.size(); ++i) {
+                vertexArray[i] = vertices[i];
+            }
+            needsUpdate = false;
+        }
+    }
 };
+
+
+struct ChunkData {
+    Chunk chunkInfo, airInChunk;
+
+    std::map<std::pair<int, int>, sf::RectangleShape> collisionBlocks; // Exposed blocks
+
+    
+    bool airCheck(int xPos, int yPos, Chunk *airInfo) {
+        for (size_t indx = 0; indx < (*airInfo).vertices.size(); indx+=4) {
+            if ((*airInfo).vertices[indx].position.y == yPos && (*airInfo).vertices[indx].position.x == xPos) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void adjustCollisions(int xPos, int yPos) {
+        //std::cout << "block pos x: " << xPos <<  " block pos y: " << yPos << std::endl;
+        if (collisionBlocks.count({xPos, yPos})) {
+            std::cout << "erased" << std::endl;
+        }
+
+        collisionBlocks.erase({xPos, yPos});
+        sf::RectangleShape block;
+        sf::Vector2f size(8.0f, 8.0f);
+        block.setSize(size);
+
+
+        auto addBlockIfNeeded = [&](int newX, int newY) {
+            if (!collisionBlocks.count({newX, newY}) && airCheck(newX, newY, &airInChunk)) {
+                sf::Vector2f position(newX, newY);
+                block.setPosition(position);
+                collisionBlocks[{newX, newY}] = block;
+            }
+        };
+
+        // Check in all four directions
+        addBlockIfNeeded(xPos, yPos + BLOCK_SIZE); // Above
+        addBlockIfNeeded(xPos, yPos - BLOCK_SIZE); // Below
+        addBlockIfNeeded(xPos + BLOCK_SIZE, yPos); // Right
+        addBlockIfNeeded(xPos - BLOCK_SIZE, yPos); // Left
+    }
+};
+
 
 void generateChunkImprov(int chunkX, int chunkY, std::unordered_map<std::pair<int, int>, ChunkData, PairHash> *chunks);
 

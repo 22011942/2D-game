@@ -17,7 +17,7 @@ Player::Player(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, 
     faceRight = true;
     body.setSize(sf::Vector2f(30.0f, 20.0f));
     body.setOrigin(body.getSize() / 2.0f);
-    body.setPosition(0.0f, 50.0f);
+    body.setPosition(0.0f, 0.0f);
     body.setTexture(texture);
 }
 
@@ -117,13 +117,11 @@ void Player::mouseInteration(sf::RenderWindow& window, ChunkData* chunk) {
         sf::Vector2i mousePos = sf::Mouse::getPosition(window);
         sf::Vector2f worldPos = window.mapPixelToCoords(mousePos);
 
-        for (size_t indx = 0; indx < chunk->chunkInfo.getVertexCount(); indx +=4) {
-            if (chunk->chunkInfo[indx].position.x / BLOCK_SIZE == (int)worldPos.x / BLOCK_SIZE && chunk->chunkInfo[indx].position.y / BLOCK_SIZE == (int)worldPos.y / BLOCK_SIZE) {
-                chunk->chunkInfo[indx].color = sf::Color::Transparent;
-                chunk->chunkInfo[indx + 1].color = sf::Color::Transparent;
-                chunk->chunkInfo[indx + 2].color = sf::Color::Transparent;
-                chunk->chunkInfo[indx + 3].color = sf::Color::Transparent;
-                std::cout << "A match has been found" << std::endl;
+        for (int indx = chunk->chunkInfo.vertices.size() - 4; indx >= 0; indx -= 4) {
+            if (chunk->chunkInfo.vertices.at(indx).position.x / BLOCK_SIZE == (int)worldPos.x / BLOCK_SIZE && chunk->chunkInfo.vertices.at(indx).position.y / BLOCK_SIZE == (int)worldPos.y / BLOCK_SIZE) {
+                chunk->airInChunk.addQuad(chunk->chunkInfo.vertices.at(indx).position.x, chunk->chunkInfo.vertices.at(indx).position.y, sf::Color::Transparent);
+                chunk->chunkInfo.removeQuad(indx / 4);
+                chunk->adjustCollisions(chunk->chunkInfo.vertices.at(indx).position.x, chunk->chunkInfo.vertices.at(indx).position.y);
             }
         }
     }

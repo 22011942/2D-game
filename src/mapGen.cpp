@@ -21,6 +21,10 @@ typedef enum {
     SANDb, DIRTb, ROCKb, WATERb, LAVAb, DARK_DIRTb, CLAYb, CAVEb, GRASSb, AIRb
 } blockTypes;
 
+
+void middleBiome (float temperature, float humidity);
+void biomeGen(float continentalness, float erosion, float temperature, float humidity);
+
 float multiNoise(float blockX, float blockY, float frequency, float amplitude) {
     float value {0};
 
@@ -39,197 +43,6 @@ float multiNoise(float blockX, float blockY, float frequency, float amplitude) {
     return value;
 }
 
-void middleBiome (float temperature, float humidity) {
-    float weirdness = multiNoise(temperature, humidity, 1.0f, 1.0f);
-
-    if (temperature >= -1 && temperature < -0.7) {
-        //level 0 
-        if (humidity >= -1 && humidity < -0.7) {
-            if (weirdness < 0) {
-                //snowy plains
-                currentBiome = SNOWY_PLAINS;
-            } else if (weirdness > 0) {
-                //ice spikes
-                currentBiome = ICE_SPIKES;
-            }
-        } else if (humidity >= -0.7 && humidity < -0.3) {
-            //snowy plains
-            currentBiome = SNOWY_PLAINS;
-        } else if (humidity >= -0.3 && humidity < 0.3) {
-            if (weirdness < 0) {
-                //snowy tundra
-                currentBiome = SNOWY_TUNDRA;
-            } else if (weirdness > 0) {
-                //snowy taiga
-                currentBiome = SNOWY_TAIGA;
-            }
-        } else if (humidity >= 0.3 && humidity < 0.7) {
-            //snowy taiga
-            currentBiome = SNOWY_TAIGA;
-        } else if (humidity >= 0.7 && humidity < 1) {
-            //Taiga
-            currentBiome = TAIGA;
-        }
-    } else if (temperature >= -0.7 && temperature < -0.2) {
-        //level 1
-        if (humidity >= 1 && humidity < -0.3) {
-            //plains
-            currentBiome = PLAINS;
-        } else if (humidity >= -0.3 && humidity < 0.3) {
-            //forest
-            currentBiome = FOREST;
-        } else if (humidity >= 0.3 && humidity < 0.7) {
-            //Taiga
-            currentBiome = TAIGA;
-        } else if (humidity >= 0.7 && humidity <= 1) {
-            if (weirdness < 0) {
-                //old growth spruce taiga
-                currentBiome = OLD_GROWTH_SPRUCE_TAIGA;
-            } else if (weirdness > 0) {
-                //old growth pine taiga
-                currentBiome = OLD_GROWTH_PINE_TAIGA;
-            }
-        }
-    } else if (temperature >= -0.2 && temperature < 0.5) {
-        //level 2
-        if (humidity >= -1 && humidity < -0.7) {
-            if (weirdness < 0) {
-                //Flower forest
-                currentBiome = FLOWER_FOREST;
-            } else if (weirdness > 0) {
-                //Sunflower plains
-                currentBiome = SUNFLOWER_PLAINS;
-            }
-        } else if (humidity >= -0.7 && humidity < -0.3) {
-            //plains
-            currentBiome = PLAINS;
-        } else if (humidity >= -0.3 && humidity < 0.3) {
-            // forest
-            currentBiome = FOREST;
-        } else if (humidity >= 0.3 && humidity < 0.7) {
-            if (weirdness < 0) {
-                //Birch forest
-                currentBiome = BIRCH_FOREST;
-            } else if (weirdness > 0) {
-                //Old growth birch forest
-                currentBiome = OLD_GROWTH_BIRCH_FOREST;
-            }
-        } else if (humidity >= 0.7 && humidity <= 1) {
-            //dark forest
-            currentBiome = DARK_FOREST;
-        }
-    } else if (temperature >= 0.5 && temperature < 0.8) {
-        //level 3
-        if (humidity >= 1 && humidity < -0.3) {
-            //Savanna
-            currentBiome = SAVANNA;
-        } else if (humidity >= -0.3 && humidity < 0.3) {
-            if (weirdness < 0) {
-                //Forest
-                currentBiome = FOREST;
-            } else if (weirdness > 0) {
-                //Plains
-                currentBiome = PLAINS;
-            }
-        } else if (humidity >= 0.3 && humidity < 0.7) {
-            if (weirdness < 0) {
-                //Jungle
-                currentBiome = JUNGLE;
-            } else if (weirdness > 0) {
-                //Sparse jungle
-                currentBiome = SPARSE_JUNGLE;
-            }
-        } else if (humidity >= 0.7 && humidity <= 1) {
-            if (weirdness < 0) {
-                //Jungle
-                currentBiome = JUNGLE;
-            } else if (weirdness > 0) {
-                //Bamboo jungle
-                currentBiome = BAMBOO_JUNGLE;
-            }
-        }
-    } else if (temperature >= 0.8 && temperature <= 1) {
-        //desert
-        currentBiome = DESERT;
-    }
-
-
-}
-
-
-void biomeGen(float continentalness, float erosion, float temperature, float humidity) {
-    
-    if (erosion >= -1 && erosion < -0.78) {
-            //level 0
-            //peak biome
-            currentBiome = PEAKS;
-    } else if (erosion >= -0.78 && erosion < -0.375) {
-        //level 1
-        if (continentalness < 0) {
-            if (temperature >= -1 && temperature < -0.4) {
-                //slope biome COLD
-                currentBiome = SNOWY_SLOPES;
-            } else if (temperature >= -0.4 && temperature < 0.4) {
-                //Middle biome
-                middleBiome(temperature, humidity);
-            } else if (temperature >= 0.4 && temperature < 1) {
-                //Badlands biome HOT
-                currentBiome = BADLANDS;
-            }
-        } else if (continentalness > 0) {
-            //peak biome
-            currentBiome = PEAKS;
-        }
-    } else if (erosion >= -0.375 && erosion < -0.2225) {
-        //level 2
-        if (continentalness < 0) {
-            //middle biome
-            middleBiome(temperature, humidity);
-        } else if (continentalness > 0) {
-            //plateau biome
-            currentBiome = PLATEAU;
-        }
-    } else if (erosion >= -0.2225 && erosion < 0.05) {
-        //level 3
-        if (continentalness < 0) {
-            //middle biome
-            middleBiome(temperature, humidity);
-        } else if (continentalness > 0 && continentalness < 0.5) {
-            if (temperature < 0) {
-                //middle biome
-                middleBiome(temperature, humidity);
-            } else if (temperature > 0) {
-                //badlands biome
-                currentBiome = BADLANDS;
-            }
-        } else if (continentalness >= 0.5 && continentalness <= 1) {
-            //plateau biome
-            currentBiome = PLATEAU;
-        }
-    } else if (erosion >= 0.05 && erosion < 0.45) {
-        //level 4
-        //middle biome
-        middleBiome(temperature, humidity);
-    } else if (erosion >= 0.45 && erosion < 0.55) {
-        //level 5
-        if (continentalness < 0) {
-            if (temperature < 0) {
-                //shattered biome
-                currentBiome = SHATTERED;
-            } else if (temperature > 0) {
-                //windswept savanna
-                currentBiome = SAVANNA;
-            }
-        } else if (continentalness > 0) {
-            //shattered biome
-            currentBiome = SHATTERED;
-        }
-    } else if (erosion >= 0.55 && erosion <= 1) {
-        //level 6
-        //middle biome
-        middleBiome(temperature, humidity);
-    }
-}
 
 std::string biomeToString(biomes biome) {
     switch (biome) {
@@ -262,8 +75,8 @@ std::string biomeToString(biomes biome) {
     }
 }
 
-bool grassCheck(int y, int x, sf::VertexArray air) {
-    for (size_t indx = 0; indx < air.getVertexCount(); indx += 4) {
+bool grassCheck(int y, int x, std::vector<sf::Vertex> air) {
+    for (size_t indx = 0; indx < air.size(); indx += 4) {
         if (air[indx].position.y == y && air[indx].position.x == x) {
             return true;
         }
@@ -271,8 +84,9 @@ bool grassCheck(int y, int x, sf::VertexArray air) {
     return false;
 }
 
-bool surfaceCollisionCheck(int y, int x, sf::VertexArray air) {
-    for (size_t indx = 0; indx < air.getVertexCount(); indx += 4) {
+
+bool surfaceCollisionCheck(int y, int x, std::vector<sf::Vertex> air) {
+    for (size_t indx = 0; indx < air.size(); indx += 4) {
         if ((air[indx].position.y == y + BLOCK_SIZE && air[indx].position.x == x) || (air[indx].position.y == y - BLOCK_SIZE && air[indx].position.x == x) || (air[indx].position.y == y + BLOCK_SIZE && air[indx].position.x == x - BLOCK_SIZE) || (air[indx].position.y == y + BLOCK_SIZE && air[indx].position.x == x + BLOCK_SIZE)) {
             return true;
         }
@@ -283,8 +97,12 @@ bool surfaceCollisionCheck(int y, int x, sf::VertexArray air) {
 
 void generateChunkImprov(int chunkX, int chunkY, std::unordered_map<std::pair<int, int>, ChunkData, PairHash> *chunks) {
     std::unordered_map<int, int> underGroundValues;
-    sf::VertexArray chunk(sf::Quads);
-    sf::VertexArray air(sf::Quads);
+    //sf::VertexArray chunk(sf::Quads);
+    //sf::VertexArray air(sf::Quads);
+
+    ChunkData newChunk;
+
+
     std::map<std::pair<int, int>, sf::RectangleShape> collisionBlocks;
 
     for (int blockX = 0; blockX < CHUNK_SIZE; blockX++) {
@@ -479,62 +297,43 @@ void generateChunkImprov(int chunkX, int chunkY, std::unordered_map<std::pair<in
             } 
 
             if (blockColor != sf::Color::Transparent) {
-                sf::Vertex topLeft(sf::Vector2f(worldX * BLOCK_SIZE, worldY * BLOCK_SIZE), blockColor);
-                sf::Vertex topRight(sf::Vector2f((worldX + 1) * BLOCK_SIZE, worldY * BLOCK_SIZE), blockColor);
-                sf::Vertex bottomRight(sf::Vector2f((worldX + 1) * BLOCK_SIZE, (worldY + 1) * BLOCK_SIZE), blockColor);
-                sf::Vertex bottomLeft(sf::Vector2f(worldX * BLOCK_SIZE, (worldY + 1) * BLOCK_SIZE), blockColor);
-                chunk.append(topLeft);
-                chunk.append(topRight);
-                chunk.append(bottomRight);
-                chunk.append(bottomLeft);
-                //std::cout << "worldx " << worldX << " worldx * blocksize " << worldY << std::endl;
+                newChunk.chunkInfo.addQuad(worldX, worldY, blockColor);
+
             } else {
-                //std::cout << "worldx " << worldX << " worldx * blocksize " << worldX * BLOCK_SIZE << std::endl;
-                sf::Vertex topLeft(sf::Vector2f(worldX * BLOCK_SIZE, worldY * BLOCK_SIZE), blockColor);
-                sf::Vertex topRight(sf::Vector2f((worldX + 1) * BLOCK_SIZE, worldY * BLOCK_SIZE), blockColor);
-                sf::Vertex bottomRight(sf::Vector2f((worldX + 1) * BLOCK_SIZE, (worldY + 1) * BLOCK_SIZE), blockColor);
-                sf::Vertex bottomLeft(sf::Vector2f(worldX * BLOCK_SIZE, (worldY + 1) * BLOCK_SIZE), blockColor);
-                air.append(topLeft);
-                air.append(topRight);
-                air.append(bottomRight);
-                air.append(bottomLeft);
+                newChunk.airInChunk.addQuad(worldX, worldY, blockColor);
             }
         }
     }
 
-    
-    for (size_t indx = 0; indx < chunk.getVertexCount(); indx+=4) {
-        if (chunk[indx].color == DIRT) {
-            //std:: cout << "height: " <<underGroundValues[chunk[indx].position.x / BLOCK_SIZE] << std::endl;
-            if (grassCheck(chunk[indx].position.y - BLOCK_SIZE, chunk[indx].position.x, air)) { // && chunk[indx].position.y <= (underGroundValues[chunk[indx].position.x / BLOCK_SIZE]) * BLOCK_SIZE
-                //std::cout << "Current x pos: " << chunk[indx].position.x << "   current y pos: " << chunk[indx].position.y << std::endl;
-                float treeSpawns = multiNoise(chunk[indx].position.x * 0.5f, chunk[indx].position.y * 2.0f, 50.0f, 1.0f);
 
-                chunk[indx].color = GRASS;
-                chunk[indx + 1].color = GRASS;
-                chunk[indx + 2].color = GRASS;
-                chunk[indx + 3].color = GRASS;
+    for (size_t indx = 0; indx < newChunk.chunkInfo.vertices.size(); indx+=4) {
+        if (newChunk.chunkInfo.vertices[indx].color == DIRT) {
+            if (grassCheck(newChunk.chunkInfo.vertices[indx].position.y - BLOCK_SIZE, newChunk.chunkInfo.vertices[indx].position.x, newChunk.airInChunk.vertices)) { // && chunk[indx].position.y <= (underGroundValues[chunk[indx].position.x / BLOCK_SIZE]) * BLOCK_SIZE
+                float treeSpawns = multiNoise(newChunk.chunkInfo.vertices[indx].position.x * 0.5f, newChunk.chunkInfo.vertices[indx].position.y * 2.0f, 50.0f, 1.0f);
+
+                newChunk.chunkInfo.vertices[indx].color = GRASS;
+                newChunk.chunkInfo.vertices[indx + 1].color = GRASS;
+                newChunk.chunkInfo.vertices[indx + 2].color = GRASS;
+                newChunk.chunkInfo.vertices[indx + 3].color = GRASS;
 
                 if (treeSpawns < treeSpawnRate) {
-                    spawnTreeAt(chunk[indx].position.x + BLOCK_SIZE, chunk[indx].position.y, &chunk);
+                    spawnTreeAt(newChunk.chunkInfo.vertices[indx].position.x + BLOCK_SIZE, newChunk.chunkInfo.vertices[indx].position.y, &newChunk);
                 }
             }
         }
     }
 
 
-    ChunkData newChunk;
+    for (size_t indx = 0; indx < newChunk.chunkInfo.vertices.size(); indx+=4) {
+        if (surfaceCollisionCheck(newChunk.chunkInfo.vertices[indx].position.y, newChunk.chunkInfo.vertices[indx].position.x, newChunk.airInChunk.vertices) && newChunk.chunkInfo.vertices[indx].color != TRUNK_BLOCK && newChunk.chunkInfo.vertices[indx].color != LEAVES_BLOCK) {
 
-    for (size_t indx = 0; indx < chunk.getVertexCount(); indx+=4) {
-        if (surfaceCollisionCheck(chunk[indx].position.y, chunk[indx].position.x, air) && chunk[indx].color != TRUNK_BLOCK && chunk[indx].color != LEAVES_BLOCK) {
-
-            float minX = chunk[indx].position.x;
-            float minY = chunk[indx].position.y;
-            float maxX = chunk[indx].position.x;
-            float maxY = chunk[indx].position.y;
+            float minX = newChunk.chunkInfo.vertices[indx].position.x;
+            float minY = newChunk.chunkInfo.vertices[indx].position.y;
+            float maxX = newChunk.chunkInfo.vertices[indx].position.x;
+            float maxY = newChunk.chunkInfo.vertices[indx].position.y;
 
             for (size_t i = 1; i < 4; ++i) {
-                sf::Vector2f point = chunk[indx + i].position;
+                sf::Vector2f point = newChunk.chunkInfo.vertices[indx + i].position;
                 if (point.x < minX) minX = point.x;
                 if (point.y < minY) minY = point.y;
                 if (point.x > maxX) maxX = point.x;
@@ -548,16 +347,208 @@ void generateChunkImprov(int chunkX, int chunkY, std::unordered_map<std::pair<in
             block.setSize(rect.getSize());
             block.setPosition(rect.getPosition());
 
-            //std::cout << "block pos x: " << block.getPosition().x <<  " block pos y: " << block.getPosition().y << std::endl;
+            //std::cout << "block pos x: " << newChunk.chunkInfo.vertices[indx].position.x <<  " block pos y: " << newChunk.chunkInfo.vertices[indx].position.y << std::endl;
+            //if (newChunk.chunkInfo.vertices[indx].position.y == 3752) {
+            //    std::cout << " found" << std::endl;
+            //}
             
-            collisionBlocks[{chunk[indx].position.x, chunk[indx].position.y}] = block;
+            collisionBlocks[{newChunk.chunkInfo.vertices[indx].position.x, newChunk.chunkInfo.vertices[indx].position.y}] = block;
 
         }
     }
 
-    newChunk.chunkInfo = chunk;
-    newChunk.airInChunk = air;
+    //newChunk.chunkInfo = chunk;
+    //newChunk.airInChunk = air;
     newChunk.collisionBlocks = collisionBlocks;
 
     (*chunks)[{chunkX, chunkY}] = newChunk;
+}
+
+void middleBiome (float temperature, float humidity) {
+    float weirdness = multiNoise(temperature, humidity, 1.0f, 1.0f);
+
+    if (temperature >= -1 && temperature < -0.7) {
+        //level 0 
+        if (humidity >= -1 && humidity < -0.7) {
+            if (weirdness < 0) {
+                //snowy plains
+                currentBiome = SNOWY_PLAINS;
+            } else if (weirdness > 0) {
+                //ice spikes
+                currentBiome = ICE_SPIKES;
+            }
+        } else if (humidity >= -0.7 && humidity < -0.3) {
+            //snowy plains
+            currentBiome = SNOWY_PLAINS;
+        } else if (humidity >= -0.3 && humidity < 0.3) {
+            if (weirdness < 0) {
+                //snowy tundra
+                currentBiome = SNOWY_TUNDRA;
+            } else if (weirdness > 0) {
+                //snowy taiga
+                currentBiome = SNOWY_TAIGA;
+            }
+        } else if (humidity >= 0.3 && humidity < 0.7) {
+            //snowy taiga
+            currentBiome = SNOWY_TAIGA;
+        } else if (humidity >= 0.7 && humidity < 1) {
+            //Taiga
+            currentBiome = TAIGA;
+        }
+    } else if (temperature >= -0.7 && temperature < -0.2) {
+        //level 1
+        if (humidity >= 1 && humidity < -0.3) {
+            //plains
+            currentBiome = PLAINS;
+        } else if (humidity >= -0.3 && humidity < 0.3) {
+            //forest
+            currentBiome = FOREST;
+        } else if (humidity >= 0.3 && humidity < 0.7) {
+            //Taiga
+            currentBiome = TAIGA;
+        } else if (humidity >= 0.7 && humidity <= 1) {
+            if (weirdness < 0) {
+                //old growth spruce taiga
+                currentBiome = OLD_GROWTH_SPRUCE_TAIGA;
+            } else if (weirdness > 0) {
+                //old growth pine taiga
+                currentBiome = OLD_GROWTH_PINE_TAIGA;
+            }
+        }
+    } else if (temperature >= -0.2 && temperature < 0.5) {
+        //level 2
+        if (humidity >= -1 && humidity < -0.7) {
+            if (weirdness < 0) {
+                //Flower forest
+                currentBiome = FLOWER_FOREST;
+            } else if (weirdness > 0) {
+                //Sunflower plains
+                currentBiome = SUNFLOWER_PLAINS;
+            }
+        } else if (humidity >= -0.7 && humidity < -0.3) {
+            //plains
+            currentBiome = PLAINS;
+        } else if (humidity >= -0.3 && humidity < 0.3) {
+            // forest
+            currentBiome = FOREST;
+        } else if (humidity >= 0.3 && humidity < 0.7) {
+            if (weirdness < 0) {
+                //Birch forest
+                currentBiome = BIRCH_FOREST;
+            } else if (weirdness > 0) {
+                //Old growth birch forest
+                currentBiome = OLD_GROWTH_BIRCH_FOREST;
+            }
+        } else if (humidity >= 0.7 && humidity <= 1) {
+            //dark forest
+            currentBiome = DARK_FOREST;
+        }
+    } else if (temperature >= 0.5 && temperature < 0.8) {
+        //level 3
+        if (humidity >= 1 && humidity < -0.3) {
+            //Savanna
+            currentBiome = SAVANNA;
+        } else if (humidity >= -0.3 && humidity < 0.3) {
+            if (weirdness < 0) {
+                //Forest
+                currentBiome = FOREST;
+            } else if (weirdness > 0) {
+                //Plains
+                currentBiome = PLAINS;
+            }
+        } else if (humidity >= 0.3 && humidity < 0.7) {
+            if (weirdness < 0) {
+                //Jungle
+                currentBiome = JUNGLE;
+            } else if (weirdness > 0) {
+                //Sparse jungle
+                currentBiome = SPARSE_JUNGLE;
+            }
+        } else if (humidity >= 0.7 && humidity <= 1) {
+            if (weirdness < 0) {
+                //Jungle
+                currentBiome = JUNGLE;
+            } else if (weirdness > 0) {
+                //Bamboo jungle
+                currentBiome = BAMBOO_JUNGLE;
+            }
+        }
+    } else if (temperature >= 0.8 && temperature <= 1) {
+        //desert
+        currentBiome = DESERT;
+    }
+}
+
+void biomeGen(float continentalness, float erosion, float temperature, float humidity) {
+    
+    if (erosion >= -1 && erosion < -0.78) {
+            //level 0
+            //peak biome
+            currentBiome = PEAKS;
+    } else if (erosion >= -0.78 && erosion < -0.375) {
+        //level 1
+        if (continentalness < 0) {
+            if (temperature >= -1 && temperature < -0.4) {
+                //slope biome COLD
+                currentBiome = SNOWY_SLOPES;
+            } else if (temperature >= -0.4 && temperature < 0.4) {
+                //Middle biome
+                middleBiome(temperature, humidity);
+            } else if (temperature >= 0.4 && temperature < 1) {
+                //Badlands biome HOT
+                currentBiome = BADLANDS;
+            }
+        } else if (continentalness > 0) {
+            //peak biome
+            currentBiome = PEAKS;
+        }
+    } else if (erosion >= -0.375 && erosion < -0.2225) {
+        //level 2
+        if (continentalness < 0) {
+            //middle biome
+            middleBiome(temperature, humidity);
+        } else if (continentalness > 0) {
+            //plateau biome
+            currentBiome = PLATEAU;
+        }
+    } else if (erosion >= -0.2225 && erosion < 0.05) {
+        //level 3
+        if (continentalness < 0) {
+            //middle biome
+            middleBiome(temperature, humidity);
+        } else if (continentalness > 0 && continentalness < 0.5) {
+            if (temperature < 0) {
+                //middle biome
+                middleBiome(temperature, humidity);
+            } else if (temperature > 0) {
+                //badlands biome
+                currentBiome = BADLANDS;
+            }
+        } else if (continentalness >= 0.5 && continentalness <= 1) {
+            //plateau biome
+            currentBiome = PLATEAU;
+        }
+    } else if (erosion >= 0.05 && erosion < 0.45) {
+        //level 4
+        //middle biome
+        middleBiome(temperature, humidity);
+    } else if (erosion >= 0.45 && erosion < 0.55) {
+        //level 5
+        if (continentalness < 0) {
+            if (temperature < 0) {
+                //shattered biome
+                currentBiome = SHATTERED;
+            } else if (temperature > 0) {
+                //windswept savanna
+                currentBiome = SAVANNA;
+            }
+        } else if (continentalness > 0) {
+            //shattered biome
+            currentBiome = SHATTERED;
+        }
+    } else if (erosion >= 0.55 && erosion <= 1) {
+        //level 6
+        //middle biome
+        middleBiome(temperature, humidity);
+    }
 }

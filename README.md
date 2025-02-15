@@ -1,6 +1,6 @@
 # 2D Terrain Generation Showcase
 
-Hello I would like to say that this is my first project, and the original idea was quite ambitious but that's okay. I originally wanted ot make a 2D game similar to Terraria but i had eventually got bogged down with the porject and lost interest, i know I had made many mistakes but at the same tyime it was a huge learning process as i had never done anything like it before. 
+Hello I would like to say that this is my first project, and the original idea was quite ambitious but that's okay. I originally wanted to make a 2D game similar to Terraria but i had eventually got bogged down with the porject and lost interest, I know I had made many mistakes but at the same tyime it was a huge learning process as I had never done anything like it before. 
 
 I would say this project has helped me to greatly improve my skills and has reinvigorated me to try again with a new project and set realistic goals. It was the first time I had ever maintained a code base that large and utilized many different tools like Cmake and SFML.
 

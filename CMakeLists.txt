@@ -13,7 +13,7 @@ FetchContent_Declare(SFML
     SYSTEM)
 FetchContent_MakeAvailable(SFML)
 
-add_executable(main src/main.cpp src/animation.cpp src/player.cpp src/collider.cpp src/platform.cpp src/perlinNoise.cpp src/mapGen.cpp src/biomes.cpp)
+add_executable(main src/main.cpp src/animation.cpp src/player.cpp src/collider.cpp src/platform.cpp src/perlinNoise.cpp src/mapGen.cpp src/biomes.cpp src/structureSpawn.cpp)
 target_link_libraries(main PRIVATE sfml-graphics sfml-audio sfml-network)
 target_compile_features(main PRIVATE cxx_std_17)
 
